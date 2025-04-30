@@ -1,11 +1,11 @@
 import { StarOutlined } from "@ant-design/icons";
 import { Card } from "antd";
 
-export const PokemonCard = () => {
+export const PokemonCard = ({pokemon}) => {
     return (
         <Card
             hoverable
-            title="Ditto"
+            title={pokemon.name}
             style={{ width: 240 }}
             cover={<img alt='ditto' src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/132.png' />}
             extra={<StarOutlined />}
