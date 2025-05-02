@@ -28,7 +28,6 @@ function App() {
     }
   }, [data, isLoading, isError, searchText, dispatch]); // Add the dependencies to the useEffect hook
 
-// Dispatch the filtered Pokémon to the Redux store
   // Paginate the filtered Pokémon
   const paginatedPokemons = filteredPokemons.slice((page - 1) * limit, page * limit);
   const handleNextPage = () => {
