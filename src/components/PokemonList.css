@@ -5,4 +5,9 @@
     justify-items: center;
     align-items: center;
     gap: 2rem;
+    min-height: 100vh;
+}
+
+.pokemon-list h2 {
+    grid-column: 1 / -1; 
 }
