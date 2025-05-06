@@ -1,35 +1,34 @@
 import { Col } from 'antd'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import './App.css'
 import { useGetPokemonsQuery } from './redux/pokemonsApi';
 import { useSelector, useDispatch } from 'react-redux';
 import { PokemonList } from './components/PokemonList'
 import { Searcher } from './components/Searcher'
 import Logo from './assets/logo.svg'
-import { setPokemons } from './redux/pokemonsSlice';
-
+import { setPokemons, filteredPokemons } from './redux/pokemonsSlice';
+import { Loading } from './components/Loading';
+import { Error } from './components/Error';
 function App() {
-  const dispatch = useDispatch();
   const [page, setPage] = useState(1); // State for the current page
   const limit = 15; // Number of Pokémon per page
   const { data, isLoading, isError } = useGetPokemonsQuery(limit); // Fetch Pokémon data with pagination
+  const dispatch = useDispatch();
   const searchText = useSelector((state) => state.search.searchTerm); // Get the search term from the Redux store
-  const filteredPokemons = useSelector((state) => state.pokemons.data); // Get the Pokémon list from the Redux store
-  
-  
+  const filterPokemons = useSelector((state) => state.pokemons.filteredPokemons);
+  const paginatedPokemons = useMemo(() => {
+    return filterPokemons.slice((page - 1) * limit, page * limit);
+  }, [filterPokemons, page, limit]);
   useEffect(() => {
     if (data && !isLoading && !isError) {
-      const filterPokemons = data.results.filter((pokemon) =>
-        pokemon.name.toLowerCase().startsWith(searchText.toLowerCase())
+      dispatch(setPokemons(data.results)) // Dispatch the fetched Pokémon data to the Redux store
+      dispatch(
+        filteredPokemons(searchText) // Filter Pokémon based on the search term
       );
-      console.log('Filtered Pokémon:', filterPokemons);
-      dispatch(setPokemons(filterPokemons));
-      setPage(1); // Reset the page to 1 when the Pokémon list changes
-    }
-  }, [data, isLoading, isError, searchText, dispatch]); // Add the dependencies to the useEffect hook
+      setPage(1);} // Reset the page to 1 when the Pokémon list changes
+      }, [data, isLoading, isError, searchText, dispatch]); // Add the dependencies to the useEffect hook
 
   // Paginate the filtered Pokémon
-  const paginatedPokemons = filteredPokemons.slice((page - 1) * limit, page * limit);
   const handleNextPage = () => {
     if(page <= 10) setPage((prev) => prev + 1);
   } 
@@ -45,13 +44,20 @@ function App() {
         <img src={Logo} alt="logo" className="Pokedux" style={{ width: '100%' }} />
       </Col>
       <Col span={16} offset={4} style={{ textAlign: 'center', minWidth: '300px', margin: '0 auto', width: '100%' }}>
-        <h1>Pokedux</h1>
-        <h2>Find your favorite Pokémon</h2>
+        <h1>Find your favorite Pokémon</h1>
         <Searcher />
       </Col>
-      <PokemonList data={paginatedPokemons} isLoading={isLoading} isError={isError}/>
       {
-        filteredPokemons.length > 15 && (
+        isLoading ? (
+          <Loading />
+        ) : isError ? (
+          <Error />
+        ) : (
+          <PokemonList data={paginatedPokemons} isLoading={isLoading} isError={isError}/>
+        )
+      }
+      {
+        paginatedPokemons.length <= 15 && (
           <div className="pagination">
             <button onClick={handlePrevPage} disabled={page === 1}>Prev</button>
             <span>{page}</span>

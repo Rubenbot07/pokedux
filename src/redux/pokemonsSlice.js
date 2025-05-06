@@ -1,7 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    data: []
+    allPokemons: [],
+    filteredPokemons: [],
 }
 
 const pokemonsSlice = createSlice({
@@ -9,10 +10,17 @@ const pokemonsSlice = createSlice({
     initialState,
     reducers: {
         setPokemons: (state, action) => {
-            state.data = action.payload;
+            state.allPokemons = action.payload;
+            state.filteredPokemons = action.payload;
+        },
+        filteredPokemons: (state, action) => {
+            const searchTerm = action.payload.toLowerCase();
+            state.filteredPokemons = state.allPokemons.filter((pokemon) =>
+            pokemon.name.toLowerCase().startsWith(searchTerm)
+      );
         }
     }
 })
 
-export const { setPokemons } = pokemonsSlice.actions;
+export const { setPokemons, filteredPokemons } = pokemonsSlice.actions;
 export default pokemonsSlice.reducer;
